@@ -59,6 +59,8 @@ if($_GET['delete']){
 if($_GET['save']){
 	$link = $_POST['link'];
 	$redirect = $_POST['redirect'];
+
+	$olr_linkredirectquery="&link=$link&redirect=$redirect";	
 	
 	//strip domain/protocol from link
 	$parsed = parse_url($link);
@@ -66,7 +68,7 @@ if($_GET['save']){
 	
 	//validate $link if it's okay for htaccess
 	if($link[0]!="/"){
-		header('location:tools.php?page=olr&noturl=1');
+		header("location:tools.php?page=olr&noturl=1$olr_linkredirectquery");
 		exit();
 	}
 	
@@ -74,7 +76,7 @@ if($_GET['save']){
 	$error_level = error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 	$fp = fopen($redirect, 'r');
 	if (!$fp) {
-		header('location:tools.php?page=olr&redirectnotactive=1');
+		header("location:tools.php?page=olr&redirectnotactive=1$olr_linkredirectquery");
 		exit();
 	}
 	fclose($fp);
@@ -82,11 +84,11 @@ if($_GET['save']){
 	
 	//error checking
 	if(!$parsed['path']){
-		header('location:tools.php?page=olr&parsed=1');
+		header("location:tools.php?page=olr&parsed=1$olr_linkredirectquery");
 		exit();
 	}
 	if($link=='' || $redirect==''){
-		header('location:tools.php?page=olr&novalue=1');
+		header("location:tools.php?page=olr&novalue=1$olr_linkredirectquery");
 		exit();
 	}
 	
@@ -120,7 +122,7 @@ if($_GET['save']){
 
 		header("location:tools.php?page=olr&saved=true&htaccess_error=$htacces_error");
 	}else{
-		header("location:tools.php?page=olr&exists=1");
+		header("location:tools.php?page=olr&exists=1$olr_linkredirectquery");
 	}
 }
 
@@ -146,7 +148,7 @@ function olr_options(){
 		<div class="wrap">
 		
 			<?php if($_GET['htaccess_error']=="1"): ?>
-				<div class="error"><p>I couldn't write to your <code>.htaccess</code> file, please make sure it's writable, go back, and try again.</p></div>
+				<div class="error"><p>.htaccess Redirect couldn't write to your <code>.htaccess</code> file, please make sure it's writable and try again.</p></div>
 			<?php endif; ?>
 			
 			<?php if($_GET['exists']=="1"): ?>
@@ -154,27 +156,28 @@ function olr_options(){
 			<?php endif; ?>
 
 			<?php if($_GET['novalue']=="1"): ?>
-				<div class="error"><p>Please make sure to provide values for both fields.</p></div>
+				<div class="error"><p>Please make sure to provide valid values in both fields.</p></div>
 			<?php endif; ?>
 			
 			<?php if($_GET['redirectnotactive']=="1"): ?>
-				<div class="error"><p>The resource you are trying to redirect to is unavailable, or you did not supply a URL. Redirect locations must be supplied in URL format.</p></div>
+				<div class="error"><p>The resource you are trying to redirect to is unavailable, or you did not supply a valid URL. Redirect locations must be supplied in URL format and active locations.</p></div>
 			<?php endif; ?>
 
 			<?php if($_GET['noturl']=="1"): ?>
-				<div class="error"><p>Either one of the URL's you are trying to use does not exist, or you didn't enter a valid URL. Please check the resource and try again.</p></div>
+				<div class="error"><p>One of the fields is invalidly formatted. Please make sure and supply properly formatted URL's and paths. <em>See tooltips on fields for help.</em></p></div>
 			<?php endif; ?>
 			
 			<?php if($_GET['parsed']=="1"): ?>
-				<div class="error"><p>You are trying to redirect a whole URL, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
+				<div class="error"><p>You are trying to redirect a domain only, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
 			<?php endif; ?>		
+			
 			<h2>.htaccess Redirect</h2>
 			<p>
 				This plugin modifies your <code>.htaccess</code> file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
 			</p>
 			
 			<p>
-				For instance, you could redirect <code>http://example.com/old/raw/web/user/enethrie/my_web_page.html</code> to <code>http://example.com/enethrie/</code>
+				For instance, you could redirect <code>http://example.com/old/raw/web/user/enethrie/my_web_page.html</code> to <code>http://example.com/enethrie/</code> or <code>http://somewhereelse.com/enethrie/</code>
 			</p>
 			
 			
@@ -193,7 +196,6 @@ function olr_options(){
 			</form>
 			
 			<h3>Redirects</h3>
-
 			<?php foreach($olr as $olr_item): $c++; ?>
 				<form action="tools.php?page=olr&delete=true" method="post" class="links">
 					<p>
@@ -204,13 +206,13 @@ function olr_options(){
 						<input type="submit" value="Delete">						
 					</p>
 				</form>
-			<?php endforeach; ?>
+			<?php endforeach; if($c==0) echo "<p>No redirects</p>"; ?>
 			
 			<form action="tools.php?page=olr&save=true" method="post" class="links" style="border-top: 1px dotted #dadada">
 
 				<p>										
-					<input type="text" name="link" id="link" title="Can either be in path format (/location/of/file.html) or URL format including protocol, domain, and path (http://example.com/location/)."> to 
-					<input type="text" name="redirect" id="redirect" title="Must be in URL format, including protocol, domain and path (http://example.com/location/).">
+					<input type="text" name="link" id="link" title="Can either be in path format (/location/of/file.html) or URL format including protocol, domain, and path (http://example.com/location/)." value="<?php echo $_GET['link'] ?>"> to 
+					<input type="text" name="redirect" id="redirect" title="Must be in URL format, including protocol, domain and path (http://example.com/location/)." value="<?php echo $_GET['redirect'] ?>">
 					<input type="submit" value="Add">	
 				</p>
 				<p>
