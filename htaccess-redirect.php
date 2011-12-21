@@ -2,8 +2,8 @@
 
 /*
 Plugin Name: .htaccess Redirect
-Plugin URI: http://bitbucket.org/enethrie/outside-link-redirect
-Description: Takes an incoming http request/url and redirects it to a new one.
+Plugin URI: https://bitbucket.org/enethrie/.htaccess-redirect
+Description: This plugin modifies your .htaccess file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
 Author: Aubrey Portwood
 Version: 0.1
 Author URI: http://enethrie.com
