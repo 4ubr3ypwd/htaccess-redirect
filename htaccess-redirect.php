@@ -11,7 +11,7 @@ Author URI: http://enethrie.com
 
 $htaccess = get_option('olr_htaccess').".htaccess";
 $olr = get_option('olr');
-$olr_comment = "#by .htaccess Redirect";
+$olr_comment = "#A redirect by .htaccess Redirect Plugin";
 
 if($_GET['htaccess']){
 	update_option('olr_htaccess',$_POST['htaccess']);
@@ -83,6 +83,7 @@ if($_GET['save']){
 	}
 	
 	//valideate $redirect safe with htaccess by making sure it's a url by checking its availibility
+	//removed in place of validateURL below. Will remove completely when fully working.
 	/*$error_level = error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 		$fp = fopen($redirect, 'r');
 			if (!$fp) {
@@ -175,19 +176,19 @@ function olr_options(){
 			<?php endif; ?>
 
 			<?php if($_GET['noturl']=="1"): ?>
-				<div class="error"><p>One of the fields is invalidly formatted. Please make sure and supply properly formatted URL's.<br><strong>Please do not use realtive paths, please use absolute URL's</strong> <em>See tooltips on fields for help.</em></p></div>
+				<div class="error"><p>One of the fields is not formatted properly. Please make sure and supply properly formatted URL's.<br><strong>Please do not use realtive paths, please use absolute URL's</strong>, they will be coverted automatically. <em>See tooltips on fields for help.</em></p></div>
 			<?php endif; ?>
 			
 			<?php if($_GET['parsed']=="1"): ?>
-				<div class="error"><p>You are trying to redirect a domain only, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
+				<div class="error"><p>You are trying to redirect a domain, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
 			<?php endif; ?>
 			
 			<h2>.htaccess Redirect</h2>
 			<p>
-				This plugin modifies your <code>.htaccess</code> file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
+				This plugin modifies your <code>.htaccess</code> file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations and pages outside of your WordPress installation to pages now in WordPress.
 
-				For instance, you could redirect <code>http://example.com/old/raw/web/user/enethrie/my_web_page.html</code> to <code>http://example.com/enethrie/</code> or <code>http://somewhereelse.com/enethrie/</code>
-			</p>			
+				For instance, you could redirect <code>http://example.com/old/raw/web/user/enethrie/my_web_page.html</code> to <code>http://example.com/enethrie/</code> or <code>http://somewhereelse.com/</code>
+			</p>
 	
 			<h3>Direct path to .htaccess</h3>
 			<form action="tools.php?page=olr&htaccess=true" method="post" class="links">
@@ -225,22 +226,26 @@ function olr_options(){
 					
 					<input type="text" name="redirect" id="redirect" title="Examples: http://example.com, http://example.com/location/, http://example.com/location/file.html" required type="url" value="<?php echo $_GET['redirect'] ?>">
 					<input type="submit" value="Add">	
+					
+					<small><a id="fphelpt" href="javascript:jQuery('#fhelp').toggle();">Formatting?</a></small>
 				</p>
 
 			</form>
 
 			<div style="">
-				<h4>Formatting Help</h4>
-				<p style="margin-left:20px">
-					<small>
-						<strong>From:</strong> the from field must be a URL with a path to a directory or file, you <em>cannot</em> use URL's of domains like <code>http://example.com</code>, you must supply URL's like <code>http://example.com/path/to</code> or <code>http://example.com/path/to/file.html</code>. URL's in the from field will be automatically coverted to relative paths.
-					</small>
-				</p>
-				<p style="margin-left:20px">
-					<small>
-						<strong>To:</strong> the to field must be a URL, but does <strong>not</strong> have to supply a path. Domains can be used, like <code>http://example.com</code>.
-					</small>
-				</p>
+
+				<div id="fhelp" style="display:none;">
+					<p style="margin-left:20px;">
+						<small>
+							<strong>From:</strong> the from field must be a URL with a path to a directory or file, you <em>cannot</em> use URL's of domains like <code>http://example.com</code>, you must supply URL's like <code>http://example.com/path/to</code> or <code>http://example.com/path/to/file.html</code>. URL's in the from field will be automatically coverted to relative paths.
+						</small>
+					</p>
+					<p style="margin-left:20px;">
+						<small>
+							<strong>To:</strong> the to field must be a URL, but does <strong>not</strong> have to supply a path. Domains can be used, like <code>http://example.com</code>.
+						</small>
+					</p>
+				</div>
 			</div>
 			
 			<?php if(file_exists(get_option('olr_htaccess').'.htaccess')): ?>
