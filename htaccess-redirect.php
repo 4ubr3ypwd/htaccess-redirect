@@ -192,6 +192,9 @@ function olr_options(){
 	
 			<h3>Direct path to .htaccess</h3>
 			<form action="tools.php?page=olr&htaccess=true" method="post" class="links">
+				<div class="error">
+					<p><strong>Warning:</strong> Please only use this plugin if you know what you're doing and can edit your <code>.htaccess</code> file manually. .htaccess Redirect is currently in beta, and may cause problems for your install.</p>
+				</div>
 				<p>
 					<input type="text" id="htaccess" name="htaccess" value="<?php echo get_option('olr_htaccess'); ?>">
 					<input type="submit" value="Save">
