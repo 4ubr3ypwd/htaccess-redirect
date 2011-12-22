@@ -54,14 +54,24 @@ if($_GET['delete']){
 	header('location:tools.php?page=olr&deleted=true&htaccess_error=$htacces_error');
 }
 
-
+function validateURL($URL) {
+    $v = "/^(http|https|ftp):\/\/([A-Z0-9][A-Z0-9_-]*(?:\.[A-Z0-9][A-Z0-9_-]*)+):?(\d+)?\/?/i";
+    return (bool)preg_match($v, $URL);
+}
 
 if($_GET['save']){
 	$link = $_POST['link'];
 	$redirect = $_POST['redirect'];
-
-	$olr_linkredirectquery="&link=$link&redirect=$redirect";	
 	
+	//Return the link and redirect back to page
+	$olr_linkredirectquery="&link=$link&redirect=$redirect";	
+		
+	//validate the $link before it's pathed
+	if(!validateURL($link)){
+		header("location:tools.php?page=olr&noturl=1$olr_linkredirectquery");
+		exit();	
+	}
+
 	//strip domain/protocol from link
 	$parsed = parse_url($link);
 	$link = $parsed['path'];
@@ -72,15 +82,20 @@ if($_GET['save']){
 		exit();
 	}
 	
-	//valideate $redirect safe with htaccess
-	$error_level = error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-	$fp = fopen($redirect, 'r');
-	if (!$fp) {
-		header("location:tools.php?page=olr&redirectnotactive=1$olr_linkredirectquery");
-		exit();
+	//valideate $redirect safe with htaccess by making sure it's a url by checking its availibility
+	/*$error_level = error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+		$fp = fopen($redirect, 'r');
+			if (!$fp) {
+				header("location:tools.php?page=olr&redirectnotactive=1$olr_linkredirectquery");
+				exit();
+			}
+		fclose($fp);
+	error_reporting($error_level);*/
+	
+	if(!validateURL($redirect)){
+		header("location:tools.php?page=olr&noturl=1$olr_linkredirectquery");
+		exit();		
 	}
-	fclose($fp);
-	error_reporting($error_level);
 	
 	//error checking
 	if(!$parsed['path']){
@@ -158,29 +173,22 @@ function olr_options(){
 			<?php if($_GET['novalue']=="1"): ?>
 				<div class="error"><p>Please make sure to provide valid values in both fields.</p></div>
 			<?php endif; ?>
-			
-			<?php if($_GET['redirectnotactive']=="1"): ?>
-				<div class="error"><p>The resource you are trying to redirect to is unavailable, or you did not supply a valid URL. Redirect locations must be supplied in URL format and active locations.</p></div>
-			<?php endif; ?>
 
 			<?php if($_GET['noturl']=="1"): ?>
-				<div class="error"><p>One of the fields is invalidly formatted. Please make sure and supply properly formatted URL's and paths. <em>See tooltips on fields for help.</em></p></div>
+				<div class="error"><p>One of the fields is invalidly formatted. Please make sure and supply properly formatted URL's.<br><strong>Please do not use realtive paths, please use absolute URL's</strong> <em>See tooltips on fields for help.</em></p></div>
 			<?php endif; ?>
 			
 			<?php if($_GET['parsed']=="1"): ?>
 				<div class="error"><p>You are trying to redirect a domain only, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
-			<?php endif; ?>		
+			<?php endif; ?>
 			
 			<h2>.htaccess Redirect</h2>
 			<p>
 				This plugin modifies your <code>.htaccess</code> file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
-			</p>
-			
-			<p>
+
 				For instance, you could redirect <code>http://example.com/old/raw/web/user/enethrie/my_web_page.html</code> to <code>http://example.com/enethrie/</code> or <code>http://somewhereelse.com/enethrie/</code>
-			</p>
-			
-			
+			</p>			
+	
 			<h3>Direct path to .htaccess</h3>
 			<form action="tools.php?page=olr&htaccess=true" method="post" class="links">
 				<p>
@@ -199,7 +207,7 @@ function olr_options(){
 			<?php foreach($olr as $olr_item): $c++; ?>
 				<form action="tools.php?page=olr&delete=true" method="post" class="links">
 					<p>
-						<input type="text" name="link" id="link" disabled value="<?php echo $olr_item['link']; ?>">
+						From <input type="text" name="link" id="link" disabled value="<?php echo $olr_item['link']; ?>" title="Note: the URL was reduced to a direct path on your site.">
 						 to 
 						<input type="text" name="redirect" id="redirect" disabled value="<?php echo $olr_item['redirect']; ?>">
 						<input type="hidden" name="id" id="id" value="<?php echo $c; ?>">
@@ -211,15 +219,29 @@ function olr_options(){
 			<form action="tools.php?page=olr&save=true" method="post" class="links" style="border-top: 1px dotted #dadada">
 
 				<p>										
-					<input type="text" name="link" id="link" title="Can either be in path format (/location/of/file.html) or URL format including protocol, domain, and path (http://example.com/location/)." value="<?php echo $_GET['link'] ?>"> to 
-					<input type="text" name="redirect" id="redirect" title="Must be in URL format, including protocol, domain and path (http://example.com/location/)." value="<?php echo $_GET['redirect'] ?>">
+					From <input type="text" name="link" id="link" title="Examples: http://example.com/location/, http://example.com/location/file.php" required type="url" value="<?php echo $_GET['link'] ?>"> 
+
+					to
+					
+					<input type="text" name="redirect" id="redirect" title="Examples: http://example.com, http://example.com/location/, http://example.com/location/file.html" required type="url" value="<?php echo $_GET['redirect'] ?>">
 					<input type="submit" value="Add">	
 				</p>
-				<p>
-					<input type="text" name="link1" id="link1" value="/location/of/file.html" disabled title=""> to 
-					<input type="text" name="redirect2" id="redirect2" value="http://example.com/location/of/redirect" disabled title=""> How to format
+
+			</form>
+
+			<div style="">
+				<h4>Formatting Help</h4>
+				<p style="margin-left:20px">
+					<small>
+						<strong>From:</strong> the from field must be a URL with a path to a directory or file, you <em>cannot</em> use URL's of domains like <code>http://example.com</code>, you must supply URL's like <code>http://example.com/path/to</code> or <code>http://example.com/path/to/file.html</code>. URL's in the from field will be automatically coverted to relative paths.
+					</small>
 				</p>
-				</form>
+				<p style="margin-left:20px">
+					<small>
+						<strong>To:</strong> the to field must be a URL, but does <strong>not</strong> have to supply a path. Domains can be used, like <code>http://example.com</code>.
+					</small>
+				</p>
+			</div>
 			
 			<?php if(file_exists(get_option('olr_htaccess').'.htaccess')): ?>
 				<h3>Your .htaccess</h3>
