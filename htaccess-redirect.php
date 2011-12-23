@@ -32,7 +32,7 @@ if($_GET['delete']){
 	
 	//Remove it from htaccess
 	$old_htaccess = file_get_contents($htaccess);
-	$new_htaccess = str_replace('\n\n'.$olr_comment.'\nRedirectMatch 301 ^'.$link.'$ '.$redirect,'',$old_htaccess);
+	$new_htaccess = str_replace("\n\n".$olr_comment."\nRedirectMatch 301 ^".$link.'$ '.$redirect,'',$old_htaccess);
 
 		//write the changes
 		$htacces_error = "0";
@@ -51,7 +51,7 @@ if($_GET['delete']){
 		} update_option('olr',$olr_new); 
 	}
 		
-	header('location:tools.php?page=olr&deleted=true&htaccess_error=$htacces_error');
+	header("location:tools.php?page=olr&deleted=true&htaccess_error=$htacces_error");
 }
 
 function validateURL($URL) {
@@ -109,7 +109,7 @@ if($_GET['save']){
 	}
 	
 	//Test if the redirect is already there
-	foreach($olr as $olr_item){
+	if(is_array($olr)) foreach($olr as $olr_item){
 		if($link == $olr_item['link']
 		&& $redirect == $olr_item['redirect']
 		) $exists=true; else $exists=false;
@@ -119,7 +119,7 @@ if($_GET['save']){
 			//Add the RedirectMatch to the .htaccess file
 			$old_htaccess = file_get_contents($htaccess);
 			$new_htaccess = $old_htaccess 
-				. '\n\n'.$olr_comment.'\nRedirectMatch 301 ^'.$link.'$ '.$redirect;
+				. "\n\n".$olr_comment."\nRedirectMatch 301 ^".$link.'$ '.$redirect;
 			
 					//write the changes
 					$htacces_error = "0";
@@ -208,7 +208,7 @@ function olr_options(){
 			</form>
 			
 			<h3>Redirects</h3>
-			<?php foreach($olr as $olr_item): $c++; ?>
+			<?php if(is_array($olr)) foreach($olr as $olr_item): $c++; ?>
 				<form action="tools.php?page=olr&delete=true" method="post" class="links">
 					<p>
 						From <input type="text" name="link" id="link" disabled value="<?php echo $olr_item['link']; ?>" title="Note: the URL was reduced to a direct path on your site.">
@@ -218,7 +218,7 @@ function olr_options(){
 						<input type="submit" value="Delete">						
 					</p>
 				</form>
-			<?php endforeach; if($c==0) echo "<p>No redirects</p>"; ?>
+			<?php endforeach; else echo "<p>No redirects</p>"; ?>
 			
 			<form action="tools.php?page=olr&save=true" method="post" class="links" style="border-top: 1px dotted #dadada">
 
