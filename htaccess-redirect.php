@@ -32,7 +32,7 @@ if($_GET['delete']){
 	
 	//Remove it from htaccess
 	$old_htaccess = file_get_contents($htaccess);
-	$new_htaccess = str_replace("\n\n$olr_comment\nRedirect $link $redirect",'',$old_htaccess);
+	$new_htaccess = str_replace('\n\n'.$olr_comment.'\nRedirectMatch 301 ^'.$link.'$ '.$redirect,'',$old_htaccess);
 
 		//write the changes
 		$htacces_error = "0";
@@ -119,7 +119,7 @@ if($_GET['save']){
 			//Add the RedirectMatch to the .htaccess file
 			$old_htaccess = file_get_contents($htaccess);
 			$new_htaccess = $old_htaccess 
-				. "\n\n$olr_comment\nRedirect $link $redirect";
+				. '\n\n'.$olr_comment.'\nRedirectMatch 301 ^'.$link.'$ '.$redirect;
 			
 					//write the changes
 					$htacces_error = "0";
