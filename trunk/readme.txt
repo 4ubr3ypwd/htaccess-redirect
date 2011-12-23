@@ -4,7 +4,7 @@ Donate link: http://enethrie.com
 Tags: htaccess, .htaccess, redirect, outside, links
 Requires at least: 2.0
 Tested up to: 3.3
-Stable tag: 0.1
+Stable tag: 0.2
 
 This plugin modifies your .htaccess file to redirect requests to new locations.
 
@@ -22,3 +22,6 @@ To install this plugin just copy the .php file to your wp-content/plugins folder
 
 = 0.1 =
 First releases, please visit https://bitbucket.org/enethrie/.htaccess-redirect for more.
+
+= 0.2 =
+Fixes to filenames with spaces and some regex symbols

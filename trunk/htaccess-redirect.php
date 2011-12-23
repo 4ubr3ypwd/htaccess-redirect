@@ -5,7 +5,7 @@ Plugin Name: .htaccess Redirect
 Plugin URI: https://bitbucket.org/enethrie/.htaccess-redirect
 Description: This plugin modifies your .htaccess file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
 Author: Aubrey Portwood
-Version: 0.1
+Version: 0.2
 Author URI: http://enethrie.com
 
 WP Ref:
