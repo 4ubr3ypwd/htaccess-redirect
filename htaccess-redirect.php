@@ -7,6 +7,12 @@ Description: This plugin modifies your .htaccess file to redirect requests to ne
 Author: Aubrey Portwood
 Version: 0.1
 Author URI: http://enethrie.com
+
+WP Ref:
+
+Ref:
+	http://stackoverflow.com/questions/8217430/how-to-redirect-only-when-exact-url-matches
+
 */
 
 $htaccess = get_option('olr_htaccess').".htaccess";
