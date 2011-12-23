@@ -24,6 +24,13 @@ if($_GET['htaccess']){
 	header('location:tools.php?page=olr&deleted=true');	
 }
 
+function fixUolr($d){	
+	$a = str_replace("&","\&",$d);		
+	$a = str_replace("$","\$",$a);		
+	$a = str_replace("^","\^",$a);			
+	return $a;
+}
+
 if($_GET['delete']){
 	$id = $_POST['id'];
 
@@ -38,7 +45,7 @@ if($_GET['delete']){
 	
 	//Remove it from htaccess
 	$old_htaccess = file_get_contents($htaccess);
-	$new_htaccess = str_replace("\n\n".$olr_comment."\nRedirectMatch 301 ^".$link.'$ '.$redirect,'',$old_htaccess);
+	$new_htaccess = str_replace("\n\n".$olr_comment."\nRedirectMatch 301 \"^".fixUolr(urldecode($link)).'$" "'.fixUolr(urldecode($redirect)).'"','',$old_htaccess);
 
 		//write the changes
 		$htacces_error = "0";
@@ -120,12 +127,11 @@ if($_GET['save']){
 		&& $redirect == $olr_item['redirect']
 		) $exists=true; else $exists=false;
 	} 
-	
 	if(!$exists){
 			//Add the RedirectMatch to the .htaccess file
 			$old_htaccess = file_get_contents($htaccess);
 			$new_htaccess = $old_htaccess 
-				. "\n\n".$olr_comment."\nRedirectMatch 301 ^".$link.'$ '.$redirect;
+				. "\n\n".$olr_comment."\nRedirectMatch 301 \"^".fixUolr(urldecode($link)).'$" "'.fixUolr(urldecode($redirect)).'"';
 			
 					//write the changes
 					$htacces_error = "0";
