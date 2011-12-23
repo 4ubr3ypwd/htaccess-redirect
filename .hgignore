@@ -1,0 +1,4 @@
+﻿syntax: glob
+.svn
+branches
+tags
