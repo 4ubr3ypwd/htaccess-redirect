@@ -5,7 +5,7 @@ Plugin Name: .htaccess Redirect
 Plugin URI: http://wordpress.org/plugins/htaccess-redirect/
 Description: This plugin modifies your .htaccess file to redirect requests to new locations. This is especially useful (and intended) to redirect requests to web locations/pages outside of your WordPress installation to pages now in WordPress.
 Author: Aubrey Portwood
-Version: 0.2
+Version: 0.3.1
 Author URI: http://aubreypwd.com
 
 WP Ref:
@@ -19,7 +19,7 @@ $htaccess = get_option('olr_htaccess').".htaccess";
 $olr = get_option('olr');
 $olr_comment = "#A redirect by .htaccess Redirect Plugin";
 
-if($_GET['htaccess']){
+if(isset($_GET['htaccess'])){
 	update_option('olr_htaccess',$_POST['htaccess']);
 	header('location:tools.php?page=olr&deleted=true');	
 }
@@ -31,11 +31,12 @@ function fixUolr($d){
 	return $a;
 }
 
-if($_GET['delete']){
+if(isset($_GET['delete'])){
 	$id = $_POST['id'];
 
 	//Get which link and redirect to search for (same as below)
-	foreach($olr as $olr_item){
+	$j=0;
+	if(is_array($olr)) foreach($olr as $olr_item){
 		$j++;
 			if($j == $id){
 				$link=$olr_item['link'];
@@ -43,26 +44,33 @@ if($_GET['delete']){
 			}
 	}
 	
-	//Remove it from htaccess
-	$old_htaccess = file_get_contents($htaccess);
-	$new_htaccess = str_replace("\n\n".$olr_comment."\nRedirectMatch 301 \"^".fixUolr(urldecode($link)).'$" "'.fixUolr(urldecode($redirect)).'"','',$old_htaccess);
+	$htacces_error=NULL;
+	if(isset($link) && isset($redirect)){
+		//Remove it from htaccess
+		$old_htaccess = file_get_contents($htaccess);
+		$new_htaccess = str_replace("\n\n".$olr_comment."\nRedirectMatch 301 \"^".fixUolr(urldecode($link)).'$" "'.fixUolr(urldecode($redirect)).'"','',$old_htaccess);
 
-		//write the changes
-		$htacces_error = "0";
-		$fh = fopen($htaccess, 'w')
-			or $htacces_error="1";
-				fwrite($fh, $new_htaccess);
-		fclose($fh);
-		
-	//Take it out of the DB
-	if($htacces_error=="0"){
-		foreach($olr as $olr_item){
-			$c++;
-				if($c != $id){ 
-					$olr_new[]=$olr_item;
-				}
-		} update_option('olr',$olr_new); 
+			//write the changes
+			$htacces_error = "0";
+			$fh = fopen($htaccess, 'w')
+				or $htacces_error="1";
+					fwrite($fh, $new_htaccess);
+			fclose($fh);
+			
+		//Take it out of the DB
+		$c=0;
+		if($htacces_error=="0"){
+			foreach($olr as $olr_item){
+				$c++;
+					if($c != $id){ 
+						$olr_new[]=$olr_item;
+					}else{
+						$olr_new=array();
+					}
+			} update_option('olr',$olr_new); 
+		}
 	}
+
 		
 	header("location:tools.php?page=olr&deleted=true&htaccess_error=$htacces_error");
 }
@@ -72,7 +80,7 @@ function validateURL($URL) {
     return (bool)preg_match($v, $URL);
 }
 
-if($_GET['save']){
+if(isset($_GET['save'])){
 	$link = $_POST['link'];
 	$redirect = $_POST['redirect'];
 	
@@ -122,11 +130,14 @@ if($_GET['save']){
 	}
 	
 	//Test if the redirect is already there
+	$exists=false;
+
 	if(is_array($olr)) foreach($olr as $olr_item){
 		if($link == $olr_item['link']
 		&& $redirect == $olr_item['redirect']
 		) $exists=true; else $exists=false;
-	} 
+	}
+
 	if(!$exists){
 			//Add the RedirectMatch to the .htaccess file
 			$old_htaccess = file_get_contents($htaccess);
@@ -175,23 +186,23 @@ function olr_options(){
 		</style>
 		<div class="wrap">
 		
-			<?php if($_GET['htaccess_error']=="1"): ?>
+			<?php if(isset($_GET['htaccess_error']) && $_GET['htaccess_error']=="1"): ?>
 				<div class="error"><p>.htaccess Redirect couldn't write to your <code>.htaccess</code> file, please make sure it's writable and try again.</p></div>
 			<?php endif; ?>
 			
-			<?php if($_GET['exists']=="1"): ?>
+			<?php if(isset($_GET['exists']) && $_GET['exists']=="1"): ?>
 				<div class="error"><p>Sorry, but that redirect already exists.</p></div>
 			<?php endif; ?>
 
-			<?php if($_GET['novalue']=="1"): ?>
+			<?php if(isset($_GET['novalue']) && $_GET['novalue']=="1"): ?>
 				<div class="error"><p>Please make sure to provide valid values in both fields.</p></div>
 			<?php endif; ?>
 
-			<?php if($_GET['noturl']=="1"): ?>
+			<?php if(isset($_GET['noturl']) && $_GET['noturl']=="1"): ?>
 				<div class="error"><p>One of the fields is not formatted properly. Please make sure and supply properly formatted URL's.<br><strong>Please do not use realtive paths, please use absolute URL's</strong>, they will be coverted automatically. <em>See tooltips on fields for help.</em></p></div>
 			<?php endif; ?>
 			
-			<?php if($_GET['parsed']=="1"): ?>
+			<?php if(isset($_GET['parsed']) && $_GET['parsed']=="1"): ?>
 				<div class="error"><p>You are trying to redirect a domain, .htaccess Redirect doesn't do that. Please provide a URL with a path, such as <code>http://example.com/my/path/to/file.html</code></p></div>
 			<?php endif; ?>
 			
@@ -220,7 +231,7 @@ function olr_options(){
 			</form>
 			
 			<h3>Redirects</h3>
-			<?php if(is_array($olr)) foreach($olr as $olr_item): $c++; ?>
+			<?php $c=0; if(is_array($olr) && sizeof($olr>0)) foreach($olr as $olr_item): $c++; ?>
 				<form action="tools.php?page=olr&delete=true" method="post" class="links">
 					<p>
 						From <input type="text" name="link" id="link" disabled value="<?php echo $olr_item['link']; ?>" title="Note: the URL was reduced to a direct path on your site.">
@@ -235,11 +246,11 @@ function olr_options(){
 			<form action="tools.php?page=olr&save=true" method="post" class="links" style="border-top: 1px dotted #dadada">
 
 				<p>										
-					From <input type="text" name="link" id="link" title="Examples: http://example.com/location/, http://example.com/location/file.php" required type="url" value="<?php echo $_GET['link'] ?>"> 
+					From <input type="text" name="link" id="link" title="Examples: http://example.com/location/, http://example.com/location/file.php" required type="url" value="<?php if(isset($_GET['link'])) echo $_GET['link'] ?>"> 
 
 					to
 					
-					<input type="text" name="redirect" id="redirect" title="Examples: http://example.com, http://example.com/location/, http://example.com/location/file.html" required type="url" value="<?php echo $_GET['redirect'] ?>">
+					<input type="text" name="redirect" id="redirect" title="Examples: http://example.com, http://example.com/location/, http://example.com/location/file.html" required type="url" value="<?php if(isset($_GET['redirect']))  echo $_GET['redirect'] ?>">
 					<input type="submit" value="Add">	
 					
 					<small><a id="fphelpt" href="javascript:jQuery('#fhelp').toggle();">Formatting?</a></small>

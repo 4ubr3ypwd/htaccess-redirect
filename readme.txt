@@ -4,7 +4,7 @@ Donate link: http://aubreypwd.com
 Tags: htaccess, .htaccess, redirect, outside, links
 Requires at least: 2.0
 Tested up to: 3.8
-Stable tag: 0.2
+Stable tag: 0.3.1
 
 This plugin modifies your .htaccess file to redirect requests to new locations.
 
