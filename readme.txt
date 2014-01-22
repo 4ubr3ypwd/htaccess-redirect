@@ -18,8 +18,14 @@ To install this plugin just copy the .php file to your wp-content/plugins folder
 
 == Changelog ==
 
-= 0.1 =
-First releases.
+= 0.3.1 =
+- Fixes issue where plugin would crash when using older versions of PHP (see http://goo.gl/9ljpRP).
+
+= 0.3 =
+- Fix to [Plugin Isn't Working since WP update](http://wordpress.org/support/topic/plugin-htaccess-redirect-plugin-isnt-working-since-wp-update?replies=1)
 
 = 0.2 =
-Fixes to filenames with spaces and some regex symbols
+- Fixes to filenames with spaces and some regex symbols
+
+= 0.1 =
+- First releases, please visit https://bitbucket.org/enethrie/.htaccess-redirect for more.
