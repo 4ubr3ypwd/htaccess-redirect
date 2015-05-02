@@ -16,6 +16,10 @@ This plugin modifies your .htaccess file to redirect requests to new locations. 
 
 Will not, obviously, work on an NGINX environment. **This will modify your .htaccess file, so before installing you should be comfortable editing it should something go wrong.**
 
+=== Multisite ===
+
+This plugin does *not* support multi-site installs.
+
 == Changelog ==
 
 = 0.3.1 =
